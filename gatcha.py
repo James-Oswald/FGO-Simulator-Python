@@ -2,8 +2,8 @@
 
 import json
 import base64
+import threading
 import tkinter as tk
-import multiprocessing
 from random import choice
 from PIL import Image, ImageTk
 from urllib.request import urlopen, Request
@@ -16,6 +16,7 @@ charList = [[char for char in charList if char["rarity"] == rarity] for rarity i
 
 currentCharaters = []   #Charaters currently displayed as pulled
 pulledCharaters = []    #Charaters displayed in your list of previously pulled charaters
+charImageData = {}
 charImages = {}
 
 # ============= Application Actions =======================
@@ -32,20 +33,22 @@ def pull(numPulls):
         currentCharaters.append(choice(npchoice(charList, None, p=[0.28, 0.28, 0.4, 0.03, 0.01])))
     renderMain()
 
+
+def fetchFGOimg(char):
+    global charImageData
+    img = Image.open(urlopen(Request(char["img1"], headers={'User-Agent':'Mozilla'})))
+    charImageData[char["id"]] = img.resize((250, 250))
+
 def renderMain():
     global charImages
     for child in pulls.winfo_children():
         child.destroy()
     for child in collection.winfo_children():
         child.destroy()
-    def fetchFGOimg(url):
-        global charImages
-        img = Image.open(urlopen(Request(char["img1"], headers={'User-Agent':'Mozilla'}))).resize((250, 250))
-        charImages[char["id"]] = ImageTk.PhotoImage(img)
-    needURLs = [char["img1"] for char in charImages if charImages.get(char["id"]) == None]
-    pool = multiprocessing.Pool(processes=4)
-    pool.map(fetchFGOimg, needURLs)
-    pool.join()
+    needURLs = [char for char in currentCharaters if charImages.get(char["id"]) == None]
+    threads = [threading.Thread(target=fetchFGOimg, args=(char,)) for char in needURLs]
+    
+    charImages = {**charImages, **{char["id"]:ImageTk.PhotoImage(charImageData[char["id"]]) for char in needURLs}}
     for char in currentCharaters:
         card = tk.Frame(pulls)
         tk.Label(card, text=char["name"] + "\n" + ("✯" * char["rarity"])).grid(row=0) 
