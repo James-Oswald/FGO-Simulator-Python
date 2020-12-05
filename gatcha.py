@@ -10,13 +10,13 @@ from numpy.random import choice as npchoice     # use this to pick a random elem
 # ============= Set up GUI ==============================
 
 window = tk.Tk()                                                #initialize the window 
-window.geometry("1300x800")                                      #set the window size
+window.geometry("1300x800")                                     #set the window size
 (pulls := tk.Frame(window, height=140)).pack(side=tk.TOP)       #add the pulls list frame to the window                   
 (controls := tk.Frame(window)).pack(side=tk.TOP)                #add the controls frame to the window
 (collection := tk.Frame(window)).pack(side=tk.BOTTOM)           #add the collection frame to the window 
 (singlePull := tk.Button(controls, text="1 Pull", command=lambda:pull(1))).grid(row=0, column=0)   #add the single pull button
 (tenPull := tk.Button(controls, text="10 Pull", command=lambda:pull(10))).grid(row=0, column=1)    #add the ten pull button
-(clearBut := tk.Button(controls, text="clean", command=lambda:clear())).grid(row=0, column=2)                  #add the clear button
+(clearBut := tk.Button(controls, text="clean", command=lambda:clear())).grid(row=0, column=2)   #add the clear button
 
 # ============= Set up Resources =========================
 
